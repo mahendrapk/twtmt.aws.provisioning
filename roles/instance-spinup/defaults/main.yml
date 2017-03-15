@@ -1,0 +1,4 @@
+---
+# defaults file for instance-spinup
+instance_ami: "ami-52b1c13d"
+instance_key: "launchKey"

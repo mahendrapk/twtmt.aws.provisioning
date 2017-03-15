@@ -1,0 +1,73 @@
+- name: Fetch Internet Gateway details
+  ec2_vpc_igw:
+    vpc_id: "{{vpc_facts.id}}"
+    region: "{{VpcRegion}}"
+    state: present
+  register: igw
+
+- name: Fetch Public Subnet details
+  ec2_vpc_subnet_facts:
+    region: "{{VpcRegion}}"
+    filters:
+      "tag:Type": Public
+      "vpc-id": "{{vpc_facts.id}}"
+  register: public
+
+- name: Fetch Route table
+  ec2_vpc_route_table_facts:
+    region: "{{VpcRegion}}"
+    filters:
+      association.subnet-id: "{{item.id}}"
+  with_items: "{{public.subnets}}"
+  register: rtbs
+
+- name: Set up default route on public subnet route table
+  vars:
+    public_subnets: "{{ public.subnets|map(attribute='id')|list }}"
+  ec2_vpc_route_table:
+    region: "{{VpcRegion}}"
+    vpc_id: "{{vpc_facts.id}}"
+    tags:
+      Name: PublicSNRoute
+      Type: Public
+    subnets: "{{public_subnets}}"
+    routes:
+      - dest: 0.0.0.0/0
+        gateway_id: "{{igw.gateway_id}}"
+  when:
+    rtbs.results[0].route_tables == [] or rtbs.results[0].route_tables[0].routes|selectattr('destination_cidr_block', 'equalto', '0.0.0.0/0')|list == []
+
+- name: Fetch All Private Subnets
+  ec2_vpc_subnet_facts:
+    region: "{{VpcRegion}}"
+    filters:
+      "tag:Type": Private
+      "vpc-id": "{{vpc_facts.id}}"
+  register: private
+
+- name: Fetch Private Route table
+  ec2_vpc_route_table_facts:
+    region: "{{VpcRegion}}"
+    filters:
+      vpc-id: "{{vpc_facts.id}}"
+      "tag:Name": PrivateSNRoute
+  register: private_rtb
+
+- name: Create a private route table
+  command: python python-modules/createRouteTable.py "{{vpc_facts.id}}" "Private" "PrivateSNRoute"
+  when:
+    private_rtb.route_tables == []
+
+- name: Fetch Private Route table after creation
+  ec2_vpc_route_table_facts:
+    region: "{{VpcRegion}}"
+    filters:
+      vpc-id: "{{vpc_facts.id}}"
+      "tag:Name": PrivateSNRoute
+  register: private_rtb
+
+- name: Associate Private Subnets to private route table
+  command: python python-modules/routeTableToSubnetAssociation.py "{{private_rtb.route_tables[0].id}}" "{{item.id}}"
+  with_items: "{{private.subnets}}"
+
+

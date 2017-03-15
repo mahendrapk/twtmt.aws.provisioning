@@ -1,0 +1,24 @@
+SubnetDetails: {"tag:Environment": "Build", "tag:Type": "Public", "tag:Name":"Public"}
+
+CountTags: {"Environment": "Build", "Role": "BuildServer", "ServerName": "JenkinsServer", "Type": "Public"}
+
+ExactCount: 1
+
+SecurityGroupName: "sg_JenkinsServer"
+
+InstanceType: m4.large
+
+instance_ami: "ami-52b1c13d"
+
+#replace this with your allocated elastic ip / public ip address
+public_ip: "1.2.3.4"
+
+InstanceVolumes:
+  - VolumeSpecifications:
+      volume_size: 10
+      volume_type: gp2
+      device_name: /dev/sda1
+      delete_on_termination: yes
+    FilesystemSpecifications:
+      volume_label: ""
+      mountpoint: /

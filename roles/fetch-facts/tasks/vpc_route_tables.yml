@@ -1,0 +1,6 @@
+- name: Fetch route_table facts of vpc
+  ec2_vpc_route_table_facts:
+    region: "{{VpcRegion}}"
+    filters:
+      vpc-id: "{{vpc_facts.id}}"
+  register: vpc_route_tables

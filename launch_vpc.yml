@@ -1,0 +1,18 @@
+---
+- hosts: localhost
+  vars:
+    templated_envs:
+      - build
+      - integration
+  tasks:
+    - name: Generate the VPC Config file
+      template: src=configs/templates/vpc_config.j2 dest=configs/{{env}}/VPC
+      when: env in templated_envs
+
+- hosts: localhost
+  name: Spin vpc
+  vars_files:
+    - "configs/{{env}}/VPC"
+    - "group_vars/{{env}}/aws_credentials.yml"
+  roles:
+    - {role: vpc-spinup}

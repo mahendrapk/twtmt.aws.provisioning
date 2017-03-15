@@ -1,0 +1,60 @@
+---
+- name: Fetch Subnet details
+  vars:
+    vpc_id_dict: {"vpc-id": "{{vpc_facts.id}}"}
+  ec2_vpc_subnet_facts:
+    region: "{{VpcRegion}}"
+    filters: "{{ SubnetDetails.update(vpc_id_dict) }}{{SubnetDetails}}"
+  register: subnet_facts
+
+- name: set EBS termination options for undefined
+  vars:
+    list1: []
+  set_fact:
+    list1: "{{ [ item.device_name ] | union(list1) }}"
+  with_items: "{{InstanceVolumes}}"
+  when:  item is not undefined and item.VolumeSpecifications.delete_on_termination is undefined
+
+- name: Check all EBS Volumes for delete_on_termination
+  fail: msg="All EBS Volumes should mention 'delete_on_termination' as either yes/no. Volumes [ {{list1 | join(', ') }} ] does not have delete_on_termination set."
+  when: list1 is defined
+
+- name: Set snapshot template for volume creation and attachment
+  command: python python-modules/volume_creation.py "{{InstanceVolumes}}"
+  register: InstanceVolumesWithSnapshot
+
+- name: Spin up instance
+  ec2:
+    region: "{{VpcRegion}}"
+    image: "{{instance_ami}}"
+    instance_type: "{{InstanceType}}"
+    tenancy: "{{VpcInstanceTenancy}}"
+    key_name: "{{instance_key}}"
+    vpc_subnet_id: "{{subnet_facts.subnets[0].id}}"
+    group_id: "{{security_group_facts.id}}"
+    instance_tags: "{{CountTags}}"
+    count_tag: "{{CountTags}}"
+    exact_count: "{{ExactCount}}"
+    volumes: "{{ InstanceVolumesWithSnapshot.stdout|from_json|map(attribute='VolumeSpecifications')|list }}"
+    assign_public_ip: no
+    wait: yes
+  register: created_instances
+
+- name: Add instance number and name to the created instances
+  ec2_tag:
+    region: "{{VpcRegion}}"
+    state: present
+    resource: "{{item.1.id}}"
+    tags:
+      Instance: "{{item.0 + 1}}"
+      Name: "{{item.1.tags.ServerName}}"
+  with_indexed_items: "{{ created_instances.tagged_instances }}"
+
+- name: Associate provided elastic IP
+  ec2_eip:
+    public_ip: "{{public_ip}}"
+    region: "{{VpcRegion}}"
+    device_id: "{{created_instances.tagged_instances[0].id}}"
+  when: public_ip is defined
+
+- set_fact: tagged_instances={{created_instances.tagged_instances}}

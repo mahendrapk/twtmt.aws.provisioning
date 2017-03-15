@@ -1,0 +1,6 @@
+- name: Fetch VPC facts
+  command: python ./python-modules/vpc_facts.py '{ "{{VpcCidrBlock}}":"{{ VpcName }}" }' '{{ VpcAccount}}'
+  register: output
+
+- set_fact:
+    vpc_facts: "{{ output.stdout|from_json }}"

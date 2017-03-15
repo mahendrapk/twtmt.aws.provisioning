@@ -1,0 +1,55 @@
+---
+- hosts: localhost
+  roles:
+  - {role: obtain-config-path}
+  tags:
+    - always
+
+- hosts: localhost
+  environment:
+    aws_access_key: "{{aws_access_key}}"
+    aws_secret_key: "{{aws_secret_key}}"
+  vars_files:
+      - "configs/{{env}}/VPC"
+      - "configs/{{env}}/security_groups"
+      - "group_vars/{{env}}/aws_credentials.yml"
+  become: no
+  pre_tasks:
+    - name: Include Instance Configuration
+      include_vars: "{{instance_config_path}}/{{instance_name}}"
+  roles:
+    - {role: instance-spinup}
+  tags:
+    - spinup
+
+- hosts: localhost
+  environment:
+    aws_access_key: "{{aws_access_key}}"
+    aws_secret_key: "{{aws_secret_key}}"
+  vars_files:
+      - "configs/{{env}}/VPC"
+      - "group_vars/{{env}}/aws_credentials.yml"
+  become: no
+  pre_tasks:
+    - name: Instance Configuration
+      include_vars: "{{instance_config_path}}/{{instance_name}}"
+  roles:
+    - {role: wait-for-ssh}
+  tags:
+    - provision
+
+- hosts: ec2hosts
+  become: yes
+  vars:
+    provision_role: "{{instance_name}}"
+  vars_files:
+      - "configs/{{env}}/VPC"
+  pre_tasks:
+    - name: Instance Configuration
+      include_vars: "{{hostvars.localhost.instance_config_path}}/{{instance_name}}"
+  roles:
+    - {role: "geerlingguy.java"}
+    - {role: "geerlingguy.jenkins", when: instance_name == 'JenkinsServer'}
+  connection: ssh
+  tags:
+    - provision

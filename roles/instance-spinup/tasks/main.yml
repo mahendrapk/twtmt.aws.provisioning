@@ -1,0 +1,3 @@
+---
+# tasks file for instance-spinup
+- include: create-instance.yml

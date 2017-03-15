@@ -1,0 +1,4 @@
+---
+# vars file for vpc-creation
+#VpcName: "Build-VPC"
+#VpcEnvironment: "Build"

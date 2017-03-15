@@ -1,0 +1,75 @@
+VpcName: "Build-VPC"
+VpcEnvironment: "Build"
+VpcCidrBlock: "{{ cidr_blocks.build.vpc_cidr_block }}"
+VpcRegion: "ap-south-1"
+VpcInstanceTenancy: "default"
+VpcAccount: "871854571744"
+
+VpcSubnets:
+  Private:
+    cidr: "{{ cidr_blocks.build.private }}"
+    az: "ap-south-1a"
+    tags: { "Name": "Private", "Environment": "Build", "Type": "Private"}
+    network_acl_rules:
+      - name: "SSHInboundFromBuildPublic"
+        rule_number : 10
+        protocol : 6
+        rule_action : "allow"
+        cidr_block :  "{{ cidr_blocks.build.public }}"
+        egress : False
+        port_range_from : 22
+        port_range_to : 22
+      - name: "FullOutboundToInternet"
+        rule_number : 990
+        protocol : 6
+        rule_action : "allow"
+        cidr_block :  "{{ cidr_blocks.all }}"
+        egress : True
+        port_range_from : 0
+        port_range_to : 65535
+
+  Public:
+    cidr: "{{ cidr_blocks.build.public }}"
+    az: "ap-south-1a"
+    tags: { "Name": "Public", "Environment": "Build", "Type": "Public"}
+    network_acl_rules:
+      - name: "SshInboundFromInternet"
+        rule_number : 10
+        protocol : 6
+        rule_action : "allow"
+        cidr_block :  "{{ cidr_blocks.all }}"
+        egress : False
+        port_range_from : 22
+        port_range_to : 22
+      - name: "HttpInboundFromInternet"
+        rule_number : 20
+        protocol : 6
+        rule_action : "allow"
+        cidr_block :  "{{ cidr_blocks.all }}"
+        egress : False
+        port_range_from : 80
+        port_range_to : 80
+      - name: "HttpsInboundFromInternet"
+        rule_number : 30
+        protocol : 6
+        rule_action : "allow"
+        cidr_block :  "{{ cidr_blocks.all }}"
+        egress : False
+        port_range_from : 443
+        port_range_to : 443
+      - name: "EphemeralPortsFromInternet"
+        rule_number : 40
+        protocol : 6
+        rule_action : "allow"
+        cidr_block :  "{{ cidr_blocks.all }}"
+        egress : False
+        port_range_from : 0
+        port_range_to : 65535
+      - name: "FullOutboundToInternet"
+        rule_number : 990
+        protocol : 6
+        rule_action : "allow"
+        cidr_block :  "{{ cidr_blocks.all }}"
+        egress : True
+        port_range_from : 0
+        port_range_to : 65535

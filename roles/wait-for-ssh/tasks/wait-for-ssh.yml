@@ -1,0 +1,27 @@
+---
+# tasks file for wait-for-ssh
+
+#- name: Update Private Key permissions
+#  file:
+#    path: "configs/{{env}}/secure/launchKey.pem"
+#    mode: 0400
+
+- add_host:
+    groupname=ec2hosts
+    hostname="{{item.tags.Name}}"
+    ansible_user=ubuntu
+    ansible_ssh_host="{{ item.public_dns_name }}"
+    ansible_ssh_port=22
+    ansible_ssh_private_key_file="/Users/Mahendrak/.aws/.keys/launchKey.pem"
+    ansible_host_key_checking=False
+    ansible_python_interpreter=/usr/bin/python3
+  with_items: "{{instance_info.instances}}"
+
+- name: Wait for SSH to come up
+  local_action:
+    wait_for host="{{ item.public_dns_name }}"
+    port=22
+    delay=10
+    timeout=240
+    state=started
+  with_items: "{{instance_info.instances}}"

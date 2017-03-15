@@ -1,0 +1,6 @@
+- name: Fetch security group facts
+  command: python ./python-modules/gatherSecurityGroupFacts.py '{{security_group_name}}' '{{vpc_facts.id}}'
+  register: output
+
+- set_fact:
+    security_group_facts: "{{ output.stdout|from_json }}"

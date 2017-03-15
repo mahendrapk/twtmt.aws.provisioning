@@ -1,0 +1,9 @@
+- name: "Set Config Path for Environments with Slice"
+  set_fact:
+    instance_config_path: "configs/{{env}}/{{slice}}"
+  when: slice is defined
+
+- name: "Set Config Path for Environments without Slice"
+  set_fact:
+    instance_config_path: "configs/{{env}}/default"
+  when: slice is not defined

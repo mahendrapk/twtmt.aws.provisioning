@@ -1,0 +1,20 @@
+- include: vpc.yml
+
+- name: Create Filters Dictionary
+  vars:
+    ec2_filter_tags: {}
+    current_dict: {}
+  set_fact:
+    current_dict: "{'tag:{{item_foo.key}}':'{{item_foo.value}}'}"
+    ec2_filter_tags: "{{ ec2_filter_tags.update(current_dict) }}{{ec2_filter_tags}}"
+  with_dict: "{{CountTags}}"
+  loop_control:
+    loop_var: item_foo
+
+- name: Get Instance Details
+  vars:
+    vpc_id_dict: {"vpc-id": "{{vpc_facts.id}}"}
+  ec2_remote_facts:
+    region: "{{VpcRegion}}"
+    filters: "{{ ec2_filter_tags.update(vpc_id_dict) }}{{ec2_filter_tags}}"
+  register: instance_info

@@ -1,0 +1,6 @@
+---
+# tasks file for vpc-creation
+- include: create-vpc.yml
+- include: ../fetch-facts/tasks/vpc.yml
+- include: create-subnets.yml
+- include: create-route-tables.yml

@@ -1,0 +1,30 @@
+VpcName: "{{vpc_name}}"
+VpcAccount: "{{vpc_account_id}}"
+VpcEnvironment: "{{vpc_environment}}"
+VpcRegion: "{{vpc_region}}"
+VpcInstanceTenancy: "{{vpc_instance_tenancy}}"
+VpcCidrBlock: "{{ vpc_cidr_block }}"
+
+VpcSubnets:
+  Build:
+      cidr: "{{ preview_wb_cidr_block }}"
+      az: "ap-south-1"
+      tags: { "Name": "Build", "Environment": "{{vpc_environment}}", "Type": "Public"}
+      network_acl_rules:
+        - name: "HttpsInboundFromPublic"
+          rule_number : 1
+          protocol : 6
+          rule_action : "allow"
+          cidr_block :  "{{ public_cidr_block }}"
+          egress : False
+          port_range_from : 443
+          port_range_to : 443
+
+        - name: "SSHInboundFromPublic"
+          rule_number : 2
+          protocol : 6
+          rule_action : "allow"
+          cidr_block :  "{{ public_cidr_block }}"
+          egress : False
+          port_range_from : 22
+          port_range_to : 22

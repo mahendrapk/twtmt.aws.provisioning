@@ -1,0 +1,34 @@
+
+- name: Select and set security group for current instance
+  set_fact:
+    instance_security_group: "{{item}}"
+  when: item.name == "{{security_group_name}}"
+  with_items: "{{ security_groups }}"
+
+- name: Find security group dependencies that are absent
+  command: python python-modules/verifySecurityGroupExistence.py "{{ instance_security_group.Dependencies }}" {{vpc_facts.id}}
+  register: dependency_check_output
+  when: instance_security_group.Dependencies is defined
+
+- name: Set absent security groups
+  set_fact:
+    absent_security_groups: "{{dependency_check_output.stdout_lines[0]}}"
+  when: dependency_check_output.changed == true
+
+- name: Create blank Security groups for absent dependencies
+  ec2_group:
+    name: "{{item}}"
+    description: "placeholder_description_gets_replaced_during_population"
+    vpc_id: "{{vpc_facts.id}}"
+    region: "{{VpcRegion}}"
+  with_items: absent_security_groups
+  when: absent_security_groups is defined
+
+- name: Populate security groups with rules
+  ec2_group:
+    name: "{{instance_security_group.name}}"
+    description: "{{instance_security_group.description}}"
+    vpc_id: "{{vpc_facts.id}}"
+    region: "{{VpcRegion}}"
+    rules: "{{instance_security_group.ingress_rules}}"
+    rules_egress: "{{instance_security_group.egress_rules}}"

@@ -1,0 +1,13 @@
+- name: Create VPC
+  ec2_vpc:
+    aws_access_key: "{{aws_access_key}}"
+    aws_secret_key: "{{aws_secret_key}}"
+    cidr_block: "{{VpcCidrBlock}}"
+    resource_tags: { "Name": "{{VpcName}}", "Environment": "{{VpcEnvironment}}"}
+    region: "{{VpcRegion}}"
+    dns_hostnames: yes
+    dns_support: yes
+    instance_tenancy: "{{VpcInstanceTenancy}}"
+    internet_gateway: yes
+    state: present
+  register: vpc_details

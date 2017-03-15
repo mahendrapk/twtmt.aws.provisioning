@@ -1,0 +1,13 @@
+- name: Create subnets
+  ec2_vpc_subnet:
+    region: "{{VpcRegion}}"
+    state: present
+    vpc_id: "{{vpc_facts.id}}"
+    cidr: "{{item.value.cidr}}"
+    az: "{{item.value.az}}"
+    tags: "{{item.value.tags}}"
+  with_dict: "{{VpcSubnets}}"
+
+- name: Create network ACLs
+  command: python python-modules/createNACL.py "{{vpc_facts.id}}" "{{item.value}}"
+  with_dict: "{{VpcSubnets}}"

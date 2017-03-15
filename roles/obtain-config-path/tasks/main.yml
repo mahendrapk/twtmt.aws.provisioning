@@ -1,0 +1,3 @@
+---
+# tasks file for obtain-config-path
+- include: obtain-config-path.yml
