@@ -57,4 +57,7 @@
     device_id: "{{created_instances.tagged_instances[0].id}}"
   when: public_ip is defined
 
+- name: set timezone
+  command: sudo timedatectl set-timezone "{{time_zone}}"
+
 - set_fact: tagged_instances={{created_instances.tagged_instances}}

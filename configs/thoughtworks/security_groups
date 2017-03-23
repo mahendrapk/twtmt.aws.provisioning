@@ -1,6 +1,6 @@
 security_groups:
   - name: sg_JenkinsServer
-    description: Security group for Jenkins Server
+    description: "Security group for Jenkins Server/Master"
     ingress_rules: [ {proto: tcp, from_port: 80, to_port: 80, cidr_ip: "{{cidr_blocks.all}}"},
                      {proto: tcp, from_port: 8080, to_port: 8080, cidr_ip: "{{cidr_blocks.all}}"},
                      {proto: tcp, from_port: 443, to_port: 443, cidr_ip: "{{cidr_blocks.all}}"},
@@ -8,10 +8,12 @@ security_groups:
     egress_rules: [ { proto: tcp, from_port: 22, to_port: 22, cidr_ip: "{{cidr_blocks.all}}" },
                     { proto: tcp, from_port: 8080, to_port: 8080, cidr_ip: "{{cidr_blocks.all}}"},
                     { proto: tcp, from_port: 80, to_port: 80, cidr_ip: "{{cidr_blocks.all}}" },
+                    { proto: tcp, from_port: 587, to_port: 587, cidr_ip: "{{cidr_blocks.all}}" },
+                    { proto: tcp, from_port: 465, to_port: 465, cidr_ip: "{{cidr_blocks.all}}" },
                     { proto: tcp, from_port: 443, to_port: 443, cidr_ip: "{{cidr_blocks.all}}"}]
 
-  - name: sg_IntegrationTestMachine
-    description: "Security group for Integration Test Machine"
+  - name: sg_JenkinsNode
+    description: "Security group for Jenkins node Machine"
     ingress_rules: [ {proto: tcp, from_port: 80, to_port: 80, cidr_ip: "{{cidr_blocks.all}}"},
                      {proto: tcp, from_port: 443, to_port: 443, cidr_ip: "{{cidr_blocks.all}}"},
                      {proto: tcp, from_port: 22, to_port: 22, cidr_ip: "{{cidr_blocks.all}}"}]

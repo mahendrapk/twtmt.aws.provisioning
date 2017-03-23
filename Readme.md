@@ -40,5 +40,5 @@ ec2_region_endpoint = ec2.ap-south-1.amazonaws.com
 #### Ansible playbook commands:
 * ansible-playbook launch_vpc.yml --extra-vars "env={{companyName}}"
 * ansible-playbook launch_instance.yml --extra-vars "env={{companyName}} slice=build instance_name=JenkinsServer"
-* ansible-playbook launch_instance.yml --extra-vars "env={{companyName}} slice=build instance_name=TestMachine1"
+* ansible-playbook launch_instance.yml --extra-vars "env=thoughtworks slice=build instance_name=JenkinsNode1"
 * ...

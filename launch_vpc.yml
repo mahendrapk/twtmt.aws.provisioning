@@ -3,7 +3,6 @@
   vars:
     templated_envs:
       - build
-      - integration
   tasks:
     - name: Generate the VPC Config file
       template: src=configs/templates/vpc_config.j2 dest=configs/{{env}}/VPC

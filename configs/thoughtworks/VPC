@@ -3,7 +3,7 @@ VpcEnvironment: "Build"
 VpcCidrBlock: "{{ cidr_blocks.build.vpc_cidr_block }}"
 VpcRegion: "ap-south-1"
 VpcInstanceTenancy: "default"
-VpcAccount: "871854571744"
+VpcAccount: "829881161389"
 
 VpcSubnets:
   Private:
